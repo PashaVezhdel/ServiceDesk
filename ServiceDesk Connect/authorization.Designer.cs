@@ -65,7 +65,7 @@
             this.txtLogin.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.txtLogin.Location = new System.Drawing.Point(45, 115);
             this.txtLogin.Name = "txtLogin";
-            this.txtLogin.PlaceholderText = "Наприклад: 123456789";
+            this.txtLogin.PlaceholderText = "Введіть ID (дізнатись: @userinfobot)";
             this.txtLogin.Size = new System.Drawing.Size(260, 27);
             this.txtLogin.TabIndex = 2;
 
