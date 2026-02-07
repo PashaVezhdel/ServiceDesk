@@ -1,28 +1,27 @@
-﻿using System;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System;
 
 namespace ServiceDesk_Connect.Models
 {
     public class Ticket
     {
         [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string? Id { get; set; } 
+        public ObjectId Id { get; set; }
 
-        [BsonElement("device")]
-        public string? DeviceName { get; set; }
+        [BsonElement("user_name")]
+        public string UserName { get; set; }
 
-        [BsonElement("user")]
-        public string? UserName { get; set; }
+        [BsonElement("device_name")]
+        public string DeviceName { get; set; }
+
+        [BsonElement("priority")] 
+        public string Priority { get; set; }
 
         [BsonElement("description")]
-        public string? Description { get; set; }
-
-        [BsonElement("photo_url")]
-        public string? PhotoPath { get; set; } 
+        public string Description { get; set; }
 
         [BsonElement("created_at")]
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; }
     }
 }
