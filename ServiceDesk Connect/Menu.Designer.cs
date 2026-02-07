@@ -57,7 +57,7 @@
             this.pnlMain.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlMain.Location = new System.Drawing.Point(0, 0);
             this.pnlMain.Padding = new System.Windows.Forms.Padding(25);
-            this.pnlMain.Size = new System.Drawing.Size(380, 520);
+            this.pnlMain.Size = new System.Drawing.Size(380, 480);
             this.pnlMain.TabIndex = 0;
 
             this.lblTitle.AutoSize = true;
@@ -168,7 +168,7 @@
 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(380, 490);
+            this.ClientSize = new System.Drawing.Size(380, 480);
             this.Controls.Add(this.pnlMain);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;

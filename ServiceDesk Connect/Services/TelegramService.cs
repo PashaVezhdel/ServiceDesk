@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Telegram.Bot;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
 namespace ServiceDesk_Connect.Services
@@ -9,7 +11,6 @@ namespace ServiceDesk_Connect.Services
     public class TelegramService
     {
         private readonly ITelegramBotClient _bot;
-        private readonly long _chatId;
 
         public TelegramService()
         {
@@ -20,13 +21,27 @@ namespace ServiceDesk_Connect.Services
             }
             DotNetEnv.Env.Load(path);
 
-            string token = DotNetEnv.Env.GetString("TELEGRAM_BOT_TOKEN");
-            string chatIdString = DotNetEnv.Env.GetString("TELEGRAM_CHAT_ID");
+            string token = DotNetEnv.Env.GetString("TELEGRAM_TOKEN");
 
-            if (!string.IsNullOrEmpty(token) && !string.IsNullOrEmpty(chatIdString))
+            if (!string.IsNullOrEmpty(token))
             {
-                _chatId = long.Parse(chatIdString);
                 _bot = new TelegramBotClient(token);
+            }
+        }
+
+        public async Task<bool> SendNotificationAsync(string message, long chatId)
+        {
+            if (_bot == null) return false;
+
+            try
+            {
+                await _bot.SendMessage(chatId, message, parseMode: ParseMode.Html);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Помилка Телеграм: {ex.Message}");
+                return false;
             }
         }
     }

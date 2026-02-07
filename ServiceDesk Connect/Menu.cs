@@ -10,10 +10,12 @@ namespace ServiceDesk_Connect
     {
         private readonly DatabaseService _db = new DatabaseService();
         private readonly TelegramService _tg = new TelegramService();
+        private readonly string _currentUserId;
 
         public Menu(string userId)
         {
             InitializeComponent();
+            _currentUserId = userId;
             this.Load += Menu_Load;
             this.FormClosed += (s, e) => Application.Exit();
         }
@@ -62,7 +64,7 @@ namespace ServiceDesk_Connect
 
             if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(phone) || string.IsNullOrEmpty(issue))
             {
-                MessageBox.Show("Будь ласка, заповніть всі поля",
+                MessageBox.Show("Будь ласка, заповніть всі поля:\n- Ім'я\n- Телефон\n- Опис проблеми",
                                 "Увага", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
@@ -97,6 +99,18 @@ namespace ServiceDesk_Connect
 
                 await _db.InsertTicketAsync(ticket);
 
+                string emoji = GetPriorityEmoji(priority);
+
+                string message = $"<b>🚨 Нова заявка</b>\n\n" +
+                                 $"{emoji} <b>Пріоритет:</b> {priority}\n" +
+                                 $"🖥 <b>Об'єкт:</b> {machine}\n" +
+                                 $"👤 <b>Від:</b> {userName}\n" +
+                                 $"📞 <b>Телефон:</b> {phone}\n\n" +
+                                 $"📝 <b>Опис:</b> {issue}";
+
+                long chatId = long.Parse(_currentUserId);
+                await _tg.SendNotificationAsync(message, chatId);
+
                 MessageBox.Show("Заявку успішно прийнято!", "Успіх", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ResetForm();
             }
@@ -115,11 +129,10 @@ namespace ServiceDesk_Connect
         private void ResetForm()
         {
             if (cmbHardware.Items.Count > 0) cmbHardware.SelectedIndex = 0;
-            cmbPriority.SelectedIndex = 1; 
-
+            cmbPriority.SelectedIndex = 1;
             txtIssue.Clear();
-            txtUser.Clear();   
-            txtPhone.Clear();  
+            txtUser.Clear();
+            txtPhone.Clear();
         }
 
         private string GetPriorityEmoji(string priority)
