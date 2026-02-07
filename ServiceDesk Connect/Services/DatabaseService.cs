@@ -14,6 +14,7 @@ namespace ServiceDesk_Connect.Services
         private readonly IMongoCollection<Ticket> _tickets;
         private readonly IMongoCollection<Machine> _machines;
         private readonly IMongoCollection<User> _users;
+        private readonly IMongoCollection<Mechanic> _mechanics;
 
         public DatabaseService()
         {
@@ -27,23 +28,32 @@ namespace ServiceDesk_Connect.Services
             string connectionString = DotNetEnv.Env.GetString("MONGODB_CONNECTION_STRING")
                                    ?? DotNetEnv.Env.GetString("MONGO_CONNECTION_STRING");
 
-            if (string.IsNullOrEmpty(connectionString))
-            {
-                throw new Exception("Не знайдено рядок підключення у файлі .env! Перевірте файл.");
-            }
-
             var client = new MongoClient(connectionString);
             _database = client.GetDatabase("support_db");
 
-            _tickets = _database.GetCollection<Ticket>("tickets");
+            _tickets = _database.GetCollection<Ticket>("mech_tickets");
             _machines = _database.GetCollection<Machine>("machines");
             _users = _database.GetCollection<User>("users");
+            _mechanics = _database.GetCollection<Mechanic>("mechanics");
         }
 
         public async Task InsertTicketAsync(Ticket ticket)
         {
-            ticket.CreatedAt = System.DateTime.Now;
+            ticket.CreatedAt = DateTime.Now;
             await _tickets.InsertOneAsync(ticket);
+        }
+
+        public async Task<List<long>> GetMechanicIdsAsync()
+        {
+            try
+            {
+                var mechanics = await _mechanics.Find(_ => true).ToListAsync();
+                return mechanics.Select(m => m.TelegramId).ToList();
+            }
+            catch
+            {
+                return new List<long>();
+            }
         }
 
         public async Task<bool> AuthenticateAsync(long telegramId, string password)

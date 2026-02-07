@@ -38,9 +38,8 @@ namespace ServiceDesk_Connect.Services
                 await _bot.SendMessage(chatId, message, parseMode: ParseMode.Html);
                 return true;
             }
-            catch (Exception ex)
+            catch
             {
-                MessageBox.Show($"Помилка Телеграм: {ex.Message}");
                 return false;
             }
         }

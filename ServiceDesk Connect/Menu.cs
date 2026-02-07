@@ -59,26 +59,19 @@ namespace ServiceDesk_Connect
             string machine = cmbHardware.SelectedItem?.ToString() ?? "Не вказано";
             string priority = cmbPriority.SelectedItem?.ToString() ?? "Середній";
             string userName = txtUser.Text.Trim();
-            string phone = txtPhone.Text.Trim();
             string issue = txtIssue.Text.Trim();
 
-            if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(phone) || string.IsNullOrEmpty(issue))
+            if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(issue))
             {
-                MessageBox.Show("Будь ласка, заповніть всі поля:\n- Ім'я\n- Телефон\n- Опис проблеми",
+                MessageBox.Show("Будь ласка, заповніть всі поля",
                                 "Увага", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             if (machine == "Помилка БД" || machine == "Список порожній" || machine == "Не вказано")
             {
-                MessageBox.Show("Неможливо відправити заявку: не обрано коректний верстат.\nПеревірте з'єднання з базою.",
+                MessageBox.Show("Неможливо відправити заявку: не обрано коректний верстат.",
                                 "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            if (phone.Length < 10)
-            {
-                MessageBox.Show("Введіть коректний номер телефону!", "Увага", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -93,23 +86,32 @@ namespace ServiceDesk_Connect
                     UserName = userName,
                     DeviceName = machine,
                     Priority = priority,
-                    Description = issue + $"\n\n📞 {phone}",
+                    Description = issue + $"\n\n🆔 Telegram ID: {_currentUserId}",
                     CreatedAt = DateTime.Now
                 };
 
                 await _db.InsertTicketAsync(ticket);
 
                 string emoji = GetPriorityEmoji(priority);
-
                 string message = $"<b>🚨 Нова заявка</b>\n\n" +
                                  $"{emoji} <b>Пріоритет:</b> {priority}\n" +
                                  $"🖥 <b>Об'єкт:</b> {machine}\n" +
-                                 $"👤 <b>Від:</b> {userName}\n" +
-                                 $"📞 <b>Телефон:</b> {phone}\n\n" +
+                                 $"👤 <b>Від:</b> <a href=\"tg://user?id={_currentUserId}\">{userName}</a>\n\n" +
                                  $"📝 <b>Опис:</b> {issue}";
 
-                long chatId = long.Parse(_currentUserId);
-                await _tg.SendNotificationAsync(message, chatId);
+                var mechanicIds = await _db.GetMechanicIdsAsync();
+
+                if (mechanicIds.Count > 0)
+                {
+                    foreach (var mechId in mechanicIds)
+                    {
+                        await _tg.SendNotificationAsync(message, mechId);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Заявку збережено, але список механіків порожній.", "Інфо", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
 
                 MessageBox.Show("Заявку успішно прийнято!", "Успіх", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ResetForm();
@@ -132,7 +134,6 @@ namespace ServiceDesk_Connect
             cmbPriority.SelectedIndex = 1;
             txtIssue.Clear();
             txtUser.Clear();
-            txtPhone.Clear();
         }
 
         private string GetPriorityEmoji(string priority)
